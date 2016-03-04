@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /**
- * Created by ttn on 02/11/2016.
+ * Created by Minh-Phong on 02/11/2016.
  */
 public class T9015ColorSensor {
 
@@ -42,11 +42,6 @@ public class T9015ColorSensor {
 
     public void init (boolean active)
     {
-        //device = color_dev;
-        //hardwareMap.logDevices();
-        //telemetry.addData("00", "init");
-        //telemetry.addData("01", "init" + "device " + device);
-
         switch (device) {
             case HITECHNIC_NXT:
                 colorSensor = hardwareMap.colorSensor.get("nxt");

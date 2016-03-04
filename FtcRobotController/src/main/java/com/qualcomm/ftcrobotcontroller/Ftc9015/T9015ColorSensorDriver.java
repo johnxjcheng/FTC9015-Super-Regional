@@ -52,32 +52,44 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 public class T9015ColorSensorDriver extends OpMode
 {
-  public enum ColorSensorDevice {ADAFRUIT, HITECHNIC_NXT, MODERN_ROBOTICS_I2C};
+    public enum ColorSensorDevice {ADAFRUIT, HITECHNIC_NXT, MODERN_ROBOTICS_I2C};
 
-  //public ColorSensorDevice device = ColorSensorDevice.MODERN_ROBOTICS_I2C;
-  public ColorSensorDevice device = ColorSensorDevice.MODERN_ROBOTICS_I2C;
+    public ColorSensorDevice device = ColorSensorDevice.MODERN_ROBOTICS_I2C;
 
-  FtcConfig ftcConfig=new FtcConfig();
-  ColorSensor colorSensor;
-  DeviceInterfaceModule cdim;
-  LED led;
-  TouchSensor t;
-  OpticalDistanceSensor ods;
-  double  ods_val;
-  boolean led_on = false;
+    FtcConfig ftcConfig=new FtcConfig();
+    ColorSensor colorSensor;
+    DeviceInterfaceModule cdim;
+    LED led;
+    TouchSensor t;
+    OpticalDistanceSensor ods;
+    double  ods_val;
+    boolean led_on = false;
 
-  UltrasonicSensor ultra;
-  double us_value;
-  int n = 0;
+    UltrasonicSensor ultra;
+    UltrasonicSensor ultra2;
+    double us_value;
+    int n = 0;
 
 
-  private Servo s_beacon, s_pull;
+    private Servo l_beacon, r_beacon, spull, sclimber, sback;
 
-  int ods_int;
-  @Override public void init ()
+    int ods_int;
+    @Override public void init ()
 
-  {
+    {
+        /*
+        spull = hardwareMap.servo.get("spull");
+        spull.setPosition(RobotInfo.PULLER_DOWN_POSITION);
+        sclimber = hardwareMap.servo.get("sclimber");
+        sclimber.setPosition(RobotInfo.CLIMBER_LOCK_POSITION);
+        sback = hardwareMap.servo.get("sback");
+        sback.setPosition(RobotInfo.BACK_DOWN_POSITION);
 
+        l_beacon = hardwareMap.servo.get("b1");
+        if (l_beacon!=null) l_beacon.setPosition(RobotInfo.BEACON_MID_POSITION);
+        r_beacon = hardwareMap.servo.get("b2");
+        if (r_beacon!=null) r_beacon.setPosition(RobotInfo.BEACON_MID_POSITION);
+        */
 /*
     //hardwareMap.logDevices();
     telemetry.addData("00", "init");
@@ -119,54 +131,68 @@ public class T9015ColorSensorDriver extends OpMode
     }
 */
 
-    //led = hardwareMap.led.get("led");
-    //if (led != null) {
-    //  led.enable(led_on);
-    //}
+        //led = hardwareMap.led.get("led");
+        //if (led != null) {
+        //  led.enable(led_on);
+        //}
 
-    ods = hardwareMap.opticalDistanceSensor.get("ods");
-    if (ods != null) {
-      ods.enableLed(false);
-      ods_val = ods.getLightDetected();
-      ods_int = ods.getLightDetectedRaw();
-      telemetry.addData("03a", "ods=" + ods_int + " " + ods_val);
-    }
+        colorSensor = hardwareMap.colorSensor.get("mrcolor");
+        colorSensor.enableLed(false);
+        telemetry.addData("02", "MODERN_ROBOTICS_I2C " + colorSensor);
 
-    ultra = hardwareMap.ultrasonicSensor.get("ultra");
-    if (ultra !=null) {
-      us_value = ultra.getUltrasonicLevel();
-      telemetry.addData("04", "ultra=" + us_value);
-    }
+
+        ods = hardwareMap.opticalDistanceSensor.get("ods");
+        if (ods != null) {
+            ods.enableLed(false);
+            ods_val = ods.getLightDetected();
+            ods_int = ods.getLightDetectedRaw();
+            telemetry.addData("03a", "ods=" + ods_int + " " + ods_val);
+        }
+
+        ultra = hardwareMap.ultrasonicSensor.get("r_us");
+        if (ultra !=null) {
+            us_value = ultra.getUltrasonicLevel();
+            telemetry.addData("04", "ultra=" + us_value);
+        }
+        ultra2 = hardwareMap.ultrasonicSensor.get("l_us");
+        if (ultra !=null) {
+            us_value = ultra2.getUltrasonicLevel();
+            telemetry.addData("05", "ultra=" + us_value);
+        }
+
 
       ftcConfig.init(hardwareMap.appContext, this);
       telemetry.addData("ColorIsRed", Boolean.toString(ftcConfig.param.colorIsRed));
       telemetry.addData("DelayInSec", Integer.toString(ftcConfig.param.delayInSec));
+        telemetry.addData("WhiteTape", Integer.toString(ftcConfig.param.whiteTape));
+      telemetry.addData("RobotPosition", Integer.toString(ftcConfig.param.position));
       telemetry.addData("AutonType", ftcConfig.param.autonType);
 
-  }
 
-  @Override public void start ()
+    }
 
-  {
-    //
-    // Only actions that are common to all Op-Modes (i.e. both automatic and
-    // manual) should be implemented here.
-    //
-    // This method is designed to be overridden.
-    //
+    @Override public void start ()
 
-  } // start
+    {
+        //
+        // Only actions that are common to all Op-Modes (i.e. both automatic and
+        // manual) should be implemented here.
+        //
+        // This method is designed to be overridden.
+        //
 
-  float hsvValues[] = {0,0,0};
-  final float values[] = hsvValues;
+    } // start
+
+    float hsvValues[] = {0,0,0};
+    final float values[] = hsvValues;
 //  final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(R.id.RelativeLayout);
 
 
-  @Override public void loop ()
-  {
+    @Override public void loop ()
+    {
 
-    telemetry.addData("04", "loop" + n);
-    n=n+1;
+        telemetry.addData("04", "loop" + n);
+        n=n+1;
     /*
     if (t!=null) {
       led_on = t.isPressed();
@@ -191,27 +217,51 @@ public class T9015ColorSensorDriver extends OpMode
     }
 */
 
-    if (ods!=null) {
-        ods.enableLed(true);
-      ods_val = ods.getLightDetected();
-      ods_int = ods.getLightDetectedRaw();
-      telemetry.addData("03a", "ods=" + ods_int + " " + ods_val);
-    }
-    if (ultra !=null) {
-      us_value = ultra.getUltrasonicLevel();
-      telemetry.addData("04", "ultra=" + us_value);
-    }
-      //ftcConfig.init(hardwareMap.appContext, this);
-      telemetry.addData("ColorIsRed", Boolean.toString(ftcConfig.param.colorIsRed));
-      telemetry.addData("DelayInSec", Integer.toString(ftcConfig.param.delayInSec));
-      telemetry.addData("AutonType", ftcConfig.param.autonType);
-/*
+        if (ods!=null) {
+            ods.enableLed(true);
+            ods_val = ods.getLightDetected();
+            ods_int = ods.getLightDetectedRaw();
+            telemetry.addData("03a", "ods=" + ods_int + " " + ods_val);
+        }
+        if (ultra !=null) {
+            us_value = ultra.getUltrasonicLevel();
+            telemetry.addData("04", "ultra=" + us_value);
+        }
+        if (ultra2 !=null) {
+            us_value = ultra2.getUltrasonicLevel();
+            telemetry.addData("05", "ultra=" + us_value);
+        }
+
+
+        telemetry.addData("ColorIsRed", Boolean.toString(ftcConfig.param.colorIsRed));
+        telemetry.addData("DelayInSec", Integer.toString(ftcConfig.param.delayInSec));
+        telemetry.addData("WhiteTape", Integer.toString(ftcConfig.param.whiteTape));
+        telemetry.addData("RobotPosition", Integer.toString(ftcConfig.param.position));
+        telemetry.addData("AutonType", ftcConfig.param.autonType);
+
       telemetry.addData("Clear", colorSensor.alpha());
       telemetry.addData("Red  ", colorSensor.red());
       telemetry.addData("Green", colorSensor.green());
       telemetry.addData("Blue ", colorSensor.blue());
       telemetry.addData("Hue", hsvValues[0]);
-*/
+        /*
+        if (ftcConfig.param.colorIsRed) {
+            if (colorSensor.red() >= 1) {
+                push_beacon(r_beacon,l_beacon);
+            }
+            else {
+                push_beacon(l_beacon,r_beacon);
+            }
+        } else
+        {
+            if (colorSensor.blue() >= 1) {
+                push_beacon(r_beacon,l_beacon);
+            }
+            else {
+                push_beacon(l_beacon,r_beacon);
+            }
+        }
+        */
 /*
     mrc.get_color();
     telemetry.addData("mClear", mrc.alpha);
@@ -240,29 +290,35 @@ public class T9015ColorSensorDriver extends OpMode
 //        }
 //      });
 
-  }
-
-  @Override public void stop ()
-  {
-    //
-    // Nothing needs to be done for this method.
-    //
-
-  } // stop
-
-  private void enableLed(boolean value) {
-    switch (device) {
-      case HITECHNIC_NXT:
-        colorSensor.enableLed(value);
-        break;
-      case ADAFRUIT:
-        if (led != null) {
-          led.enable(value);
-        }
-        break;
-      case MODERN_ROBOTICS_I2C:
-        colorSensor.enableLed(value);
-        break;
     }
-  }
+
+    @Override public void stop ()
+    {
+        //
+        // Nothing needs to be done for this method.
+        //
+
+    } // stop
+
+    private void push_beacon(Servo beacon1, Servo beacon2)
+    {
+        beacon1.setPosition(RobotInfo.BEACON_PUSH_POSITION);
+        beacon2.setPosition(RobotInfo.BEACON_MID_POSITION);
+    }
+
+    private void enableLed(boolean value) {
+        switch (device) {
+            case HITECHNIC_NXT:
+                colorSensor.enableLed(value);
+                break;
+            case ADAFRUIT:
+                if (led != null) {
+                    led.enable(value);
+                }
+                break;
+            case MODERN_ROBOTICS_I2C:
+                colorSensor.enableLed(value);
+                break;
+        }
+    }
 }

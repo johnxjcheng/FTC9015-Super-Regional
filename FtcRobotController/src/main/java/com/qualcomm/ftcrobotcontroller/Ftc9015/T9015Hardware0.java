@@ -2,7 +2,6 @@ package com.qualcomm.ftcrobotcontroller.Ftc9015;
 
 import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
@@ -14,7 +13,7 @@ import com.qualcomm.robotcore.util.Range;
 
 //------------------------------------------------------------------------------
 //
-// FTC 9015 Hardware
+// PushBotHardware
 //
 
 /**
@@ -25,13 +24,15 @@ import com.qualcomm.robotcore.util.Range;
  * If any hardware fails to map, a warning will be shown via telemetry data,
  * calls to methods will fail, but will not cause the application to crash.
  *
+ * @author SSI Robotics
+ * @version 2015-08-13-20-04
  */
-public class T9015Hardware extends OpMode
+public class T9015Hardware0 extends OpMode
 
 {
     //--------------------------------------------------------------------------
     //
-    // T9015Hardware
+    // PushBotHardware
     //
     /**
      * Construct the class.
@@ -39,15 +40,14 @@ public class T9015Hardware extends OpMode
      * The system calls this member when the class is instantiated.
      */
 
-    final static double SPULL_MIN_RANGE = 0.57;
-    final static double SPULL_MAX_RANGE  = 0.95;
+    final static double H_ARM_MIN_RANGE  = 0.52;
+    final static double H_ARM_MAX_RANGE  = 0.95;
 
     final static double H_BACK_MIN_RANGE  = 0.001;
     final static double H_BACK_MAX_RANGE  = .999;
 
     final static double CLIMBER_START  = 0.999;
     final static double CLIMBER_END    = 0.001;
-
 
     private final int TICKS_PER_REV = 1120;
     private final double WHEEL_DIAMETER = 10.16; //in centimeters
@@ -56,84 +56,9 @@ public class T9015Hardware extends OpMode
 
     final int HANGER_45_DEGREES = 100; // # of ticks per 45 degree.
 
-    private Servo init_servo(String str)
-    {
-        Servo dev;
-        try
-        {
-            dev = hardwareMap.servo.get (str);
-        }
-        catch (Exception p_exception)
-        {
-            m_warning_message (str);
-            DbgLog.msg (p_exception.getLocalizedMessage ());
-            dev = null;
-        }
-        telemetry.addData(str," init " + str + " " + dev.getPosition());
-        return dev;
-    }
 
-    private DcMotor init_motor(String str)
-    {
-        DcMotor dev;
-        try
-        {
-            dev = hardwareMap.dcMotor.get (str);
-        }
-        catch (Exception p_exception)
-        {
-            m_warning_message (str);
-            DbgLog.msg (p_exception.getLocalizedMessage ());
-            dev = null;
-        }
-        telemetry.addData(str," init " + str + " " + dev.getPower());
-        return dev;
-    }
 
-    private UltrasonicSensor init_ultrasonic(String str) {
-        UltrasonicSensor dev;
-        try {
-            dev = hardwareMap.ultrasonicSensor.get(str);
-        } catch (Exception p_exception) {
-            m_warning_message(str);
-            DbgLog.msg(p_exception.getLocalizedMessage());
-
-            dev = null;
-        }
-        telemetry.addData(str," init " + str + " " + dev.getUltrasonicLevel());
-    return dev;
-    }
-
-     private OpticalDistanceSensor init_ods(String str) {
-         OpticalDistanceSensor dev;
-         try {
-            dev = hardwareMap.opticalDistanceSensor.get(str);
-        } catch (Exception p_exception) {
-            m_warning_message(str);
-            DbgLog.msg(p_exception.getLocalizedMessage());
-
-            dev = null;
-        }
-         telemetry.addData(str," init " + str + " " + dev.getLightDetected());
-         return dev;
-     }
-
-    private ColorSensor init_color(String str) {
-        ColorSensor dev;
-        try {
-            dev = hardwareMap.colorSensor.get(str);
-        } catch (Exception p_exception) {
-            m_warning_message(str);
-            DbgLog.msg(p_exception.getLocalizedMessage());
-
-            dev = null;
-        }
-        dev.enableLed(false); // Passive mode
-        telemetry.addData(str," init " + str + "/" + dev.red() + "/" + dev.blue());
-        return dev;
-    }
-
-    public T9015Hardware()
+    public T9015Hardware0()
 
     {
         //
@@ -178,71 +103,200 @@ public class T9015Hardware extends OpMode
         // The direction of the right motor is reversed, so joystick inputs can
         // be more generically applied.
         //
-        /*
-        init_motor(v_motor_f_left_drive, "motor1");
-        init_motor(v_motor_f_right_drive, "motor2");
+        try
+        {
+            v_motor_f_left_drive = hardwareMap.dcMotor.get ("motor1");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("motor1");
+            DbgLog.msg(p_exception.getLocalizedMessage());
 
-        init_motor(v_motor_r_left_drive, "motor3");
-        init_motor(v_motor_r_right_drive, "motor4");
+            v_motor_f_left_drive = null;
+        }
 
-        init_motor(v_motor_puller,  "pull");
-        init_motor(v_motor_slider, "slide");
+        try
+        {
+            v_motor_f_right_drive = hardwareMap.dcMotor.get ("motor2");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("motor2");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
 
-        init_motor(v_motor_left_hang,  "hang1");
-        init_motor(v_motor_right_hang, "hang2");
-*/
-        v_motor_f_left_drive = hardwareMap.dcMotor.get ("motor1");
-        v_motor_f_right_drive = hardwareMap.dcMotor.get ("motor2");
-
-        v_motor_r_left_drive = hardwareMap.dcMotor.get ("motor3");
-        v_motor_r_right_drive = hardwareMap.dcMotor.get ("motor4");
-
-        v_motor_puller = hardwareMap.dcMotor.get ("pull");
-        v_motor_slider = hardwareMap.dcMotor.get ("slide");
-
-        v_motor_left_hang = hardwareMap.dcMotor.get ("hang1");
-        v_motor_right_hang = hardwareMap.dcMotor.get ("hang2");
+            v_motor_f_right_drive = null;
+        }
 
         set_direction_forward(true);
 
+        try
+        {
+            v_motor_r_left_drive = hardwareMap.dcMotor.get ("motor3");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("motor3");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_motor_r_left_drive = null;
+        }
+
+        try
+        {
+            v_motor_r_right_drive = hardwareMap.dcMotor.get ("motor4");
+        }
+        catch (Exception p_exception) {
+            m_warning_message("motor4");
+            DbgLog.msg(p_exception.getLocalizedMessage());
+
+            v_motor_r_right_drive = null;
+        }
+
+        try
+        {
+            v_motor_puller = hardwareMap.dcMotor.get ("pull");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("pull");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_motor_puller = null;
+        }
+
+        try
+        {
+            v_motor_slider = hardwareMap.dcMotor.get ("slide");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("pull");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_motor_slider = null;
+        }
+
+        try
+        {
+            v_motor_left_hang = hardwareMap.dcMotor.get ("hang1");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("hang1");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_motor_left_hang = null;
+        }
+        try
+        {
+            v_motor_right_hang = hardwareMap.dcMotor.get ("hang2");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("hang2");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_motor_right_hang = null;
+        }
         //
         // Connect the servo motors.
         //
-        /*
-        init_servo(v_servo_puller,    "spull");
-        init_servo(v_servo_back,      "sback");
-        init_servo(v_servo_climber,   "sclimber");
-        init_servo(v_servo_l_beacon,  "b1");
-        init_servo(v_servo_r_beacon,  "b2");
-        */
-        v_servo_puller = hardwareMap.servo.get ("spull");
-        v_servo_back = hardwareMap.servo.get ("sback");
-        v_servo_climber = hardwareMap.servo.get ("sclimber");
-        v_servo_l_beacon = hardwareMap.servo.get ("b1");
-        v_servo_r_beacon = hardwareMap.servo.get ("b2");
+        // Indicate the initial position of both the left and right servos.  The
+        // hand should be halfway opened/closed.
+        //
+        try
+        {
+            v_servo_puller = hardwareMap.servo.get ("spull");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("spull");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
 
+            v_servo_puller = null;
+        }
 
+        try
+        {
+            v_servo_back = hardwareMap.servo.get ("sback");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("sback");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_servo_back = null;
+        }
+
+        try
+        {
+            v_servo_climber = hardwareMap.servo.get ("sclimber");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("sclimber");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_servo_climber = null;
+        }
+/*
+        try
+        {
+            v_servo_beacon = hardwareMap.servo.get ("sbeacon");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("sbeacon");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_servo_beacon = null;
+        }
+*/
         double l_hand_position = 0.5;
 
         set_direction_forward(true);
-/*
-        init_ods(v_ods, "ods");
-        init_color(v_color, "mrcolor");
-        init_ultrasonic(v_l_ultra, "l_us");
-        init_ultrasonic(v_r_ultra,"r_us");
-        */
-        v_ods =  hardwareMap.opticalDistanceSensor.get("ods");
-        v_ods.enableLed(true);
-        v_color =  hardwareMap.colorSensor.get("mrcolor");
-        v_color.enableLed(false);
-        v_l_ultra = hardwareMap.ultrasonicSensor.get("l_us");
-        v_r_ultra = hardwareMap.ultrasonicSensor.get("r_us");
 
+        try
+        {
+            v_ods = hardwareMap.opticalDistanceSensor.get ("ods");
+                if (v_ods != null) {
+                    v_ods.enableLed(true);
+               }
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("ods");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
+
+            v_ods = null;
+        }
+
+        try
+        {
+            v_ultra = hardwareMap.ultrasonicSensor.get ("ultra");
+        }
+        catch (Exception p_exception) {
+            m_warning_message("ultra");
+            DbgLog.msg(p_exception.getLocalizedMessage());
+
+            v_ultra = null;
+        }
 
         init_servos();
+        /*
+        try
+        {
+            v_touch = hardwareMap.touchSensor.get ("touch");
+        }
+        catch (Exception p_exception)
+        {
+            m_warning_message ("touch");
+            DbgLog.msg (p_exception.getLocalizedMessage ());
 
+            v_touch = null;
+        }
+*/
     } // init
-
     void puller_up()
     {
         telemetry.addData("puller-", "up");
@@ -268,17 +322,16 @@ public class T9015Hardware extends OpMode
     }
 
 
-    double l_us_value=0;
-    double r_us_value=0;
+    double us_value=0;
     boolean reach_wall(double distance)
     {
         boolean find_wall = false;
-        if (v_r_ultra !=null) {
-        while (r_us_value==0) {
-           r_us_value = v_r_ultra.getUltrasonicLevel();
+        if (v_ultra !=null) {
+        while (us_value==0) {
+           us_value = v_ultra.getUltrasonicLevel();
         }
-        telemetry.addData("reach_wall-", "ultra=" + r_us_value + " " + distance + " " + find_wall);
-        if (r_us_value <= distance) find_wall = true;
+        telemetry.addData("reach_wall-", "ultra=" + us_value + " " + distance + " " + find_wall);
+        if (us_value <= distance) find_wall = true;
         }
         return find_wall;
     }
@@ -297,8 +350,6 @@ public class T9015Hardware extends OpMode
         return find_tape;
     }
 
-    static double m_right_beacon_red;
-    static double m_right_beacon_blue;
     void display_color()
     {
         if (v_color != null) {
@@ -306,71 +357,12 @@ public class T9015Hardware extends OpMode
             telemetry.addData("Red  ", v_color.red());
             telemetry.addData("Green", v_color.green());
             telemetry.addData("Blue ", v_color.blue());
-            m_right_beacon_red   = v_color.red();
-            m_right_beacon_blue  = v_color.blue();
         }
         else
         {
             telemetry.addData(" ERR -", "NO color sensor ");
         }
     }
-
-    void display_saved_color()
-    {
-            telemetry.addData("mRed  ", m_right_beacon_red);
-            telemetry.addData("mBlue ", m_right_beacon_blue);
-     }
-
-    void reset_beacon()
-    {
-        v_servo_l_beacon.setPosition(RobotInfo.BEACON_MID_POSITION);
-        v_servo_r_beacon.setPosition(RobotInfo.BEACON_MID_POSITION);
-    }
-
-    private void push_beacon(Servo beacon1, Servo beacon2)
-    {
-        beacon1.setPosition(RobotInfo.BEACON_PUSH_POSITION);
-        beacon2.setPosition(RobotInfo.BEACON_MID_POSITION);
-    }
-
-    void push_red_beacon()
-    {
-        display_saved_color();
-        if ((m_right_beacon_red >= 1) && (m_right_beacon_blue < 1))
-        {
-            telemetry.addData(">>>>> BEACON", " RED ******");
-            push_beacon(v_servo_r_beacon,v_servo_l_beacon);
-        }
-        else if ((m_right_beacon_blue >= 1) && (m_right_beacon_red < 1 ))
-        {
-            telemetry.addData(">>>>> BEACON", " BLUE <<<<< ");
-            push_beacon(v_servo_l_beacon,v_servo_r_beacon);
-        }
-        else
-        {
-            telemetry.addData(">>>>> BEACON", " UNDECIDE ");
-        }
-    }
-
-    void push_blue_beacon()
-    {
-        display_saved_color();
-        if ((m_right_beacon_blue >= 1) && (m_right_beacon_red < 1 ))
-        {
-            telemetry.addData("BEACON", " BLUE ");
-            push_beacon(v_servo_r_beacon,v_servo_l_beacon);
-        }
-        else if ((m_right_beacon_red >= 1) && (m_right_beacon_blue < 1))
-        {
-            telemetry.addData("BEACON", " RED ");
-            push_beacon(v_servo_l_beacon,v_servo_r_beacon);
-        }
-        else
-        {
-            telemetry.addData("BEACON", " UNDECIDE ");
-        }
-    }
-
 
     void display_ods()
     {
@@ -385,13 +377,10 @@ public class T9015Hardware extends OpMode
 
     void display_ultrasonic()
     {
-        if (v_l_ultra !=null) {
-            l_us_value = v_l_ultra.getUltrasonicLevel();
+        if (v_ultra !=null) {
+            us_value = v_ultra.getUltrasonicLevel();
         }
-        if (v_r_ultra !=null) {
-            r_us_value = v_r_ultra.getUltrasonicLevel();
-        }
-        telemetry.addData("ultra-", "ultra=" + l_us_value + " " + r_us_value );
+        telemetry.addData("ultra-", "ultra=" + us_value );
     }
 
     void reset_climber ()
@@ -408,26 +397,25 @@ public class T9015Hardware extends OpMode
         {
             v_servo_climber.setPosition(RobotInfo.CLIMBER_RELEASE_POSITION);
         }
+
     }
 
 
     void init_servos ()
     {
         if (v_servo_puller != null)
-            v_servo_puller.setPosition(RobotInfo.PULLER_DEFAULT_POSITION);
-
+        {
+            v_servo_puller.setPosition(RobotInfo.PULLER_UP_POSITION);
+        }
         if (v_servo_back != null)
-            v_servo_back.setPosition(RobotInfo.BACK_DEFAULT_POSITION);
-
+        {
+            v_servo_back.setPosition(RobotInfo.BACK_DOWN_POSITION);
+        }
         if (v_servo_climber != null)
-            v_servo_climber.setPosition(RobotInfo.CLIMBER_DEFAULT_POSITION);
+        {
+            v_servo_climber.setPosition(RobotInfo.CLIMBER_LOCK_POSITION);
+        }
 
-        if (v_servo_l_beacon != null)
-            v_servo_l_beacon.setPosition(RobotInfo.BEACON_DEFAULT_POSITION);
-
-        if (v_servo_r_beacon != null)
-            v_servo_r_beacon.setPosition(RobotInfo.BEACON_DEFAULT_POSITION);
-        telemetry.addData("DONE", " Init Servos");
     }
 
     void set_servo_down ()
@@ -1185,7 +1173,7 @@ public class T9015Hardware extends OpMode
         if (motor != null)
         {
             double cur_val = motor.getCurrentPosition ();
-            telemetry.addData("01e", "encoder" + cur_val);
+            telemetry.addData("01", "encoder" + cur_val);
             //
             // Have the encoders reached the specified values?
             //
@@ -1660,47 +1648,142 @@ public class T9015Hardware extends OpMode
         return Math.round((degrees * HANGER_45_DEGREES / 45));
     }
     //--------------------------------------------------------------------------
-    // Indicate whether a message is a available to the class user.
-        private boolean v_warning_generated = false;
-
-    // Store a message to the user if one has been generated.
-    private String v_warning_message;
+    //
+    // v_warning_generated
+    //
+    /**
+     * Indicate whether a message is a available to the class user.
+     */
+    private boolean v_warning_generated = false;
 
     //--------------------------------------------------------------------------
-    // Front wheel motors
-    private DcMotor v_motor_f_left_drive,  v_motor_f_right_drive;
+    //
+    // v_warning_message
+    //
+    /**
+     * Store a message to the user if one has been generated.
+     */
+    private String v_warning_message;
 
-    // Rear wheel motors
-    private DcMotor v_motor_r_left_drive, v_motor_r_right_drive;
 
-    // Arm hang motors
-    private DcMotor v_motor_left_hang, v_motor_right_hang;
 
-    // Motor control the tape
-    protected DcMotor v_motor_puller;
+    //--------------------------------------------------------------------------
+    //
+    // v_motor_f_left_drive
+    //
+    /**
+     * Manage the aspects of the front left drive motor.
+     */
+    private DcMotor v_motor_f_left_drive;
 
-    // Motor controls the slide for zip lines
-    protected DcMotor v_motor_slider;
+    //--------------------------------------------------------------------------
+    //
+    // v_motor_f_right_drive
+    //
+    /**
+     * Manage the aspects of the front right drive motor.
+     */
+    private DcMotor v_motor_f_right_drive;
 
-    // Servo to guide the tape
-    protected Servo v_servo_puller;
 
-    // Servo controls the back plate
-    protected Servo v_servo_back;
+    //--------------------------------------------------------------------------
+    //
+    // v_motor_r_left_drive
+    //
+    /**
+     * Manage the aspects of the rearleft drive motor.
+     */
+    private DcMotor v_motor_r_left_drive;
 
-    //  Use to drop the climber
-    protected Servo v_servo_climber;
+    //--------------------------------------------------------------------------
+    //
+    // v_motor_r_right_drive
+    //
+    /**
+     * Manage the aspects of the rear right drive motor.
+     */
+    private DcMotor v_motor_r_right_drive;
 
-    // Control push button servos
-    private Servo v_servo_l_beacon, v_servo_r_beacon;
+    //--------------------------------------------------------------------------
+    //
+    // v_motor_r_left_drive
+    //
+    /**
+     * Manage the aspects of the rearleft drive motor.
+     */
+    private DcMotor v_motor_left_hang;
+
+    //--------------------------------------------------------------------------
+    //
+    // v_motor_r_right_drive
+    //
+    /**
+     * Manage the aspects of the rear right drive motor.
+     */
+    private DcMotor v_motor_right_hang;
+
+    //--------------------------------------------------------------------------
+    //
+    // v_motor_puller
+    //
+    /**
+     * Motor to pull the tape.
+     */
+    private DcMotor v_motor_puller;
+
+    //--------------------------------------------------------------------------
+    //
+    // v_motor_slider
+    //
+    /**
+     * Motor to control the slider to get the zip line.
+     */
+    private DcMotor v_motor_slider;
+
+
+     //--------------------------------------------------------------------------
+    //
+    // v_servo_puller
+    //
+    /**
+     * Use to guide the puller angle.
+     */
+    private Servo v_servo_puller;
+
+    //--------------------------------------------------------------------------
+    //
+    // v_servo_back
+    //
+    /**
+     * Use to control the back plate
+     */
+    private Servo v_servo_back;
+
+    //--------------------------------------------------------------------------
+    //
+    // v_servo_climber
+    //
+    /**
+     * Use to drop the climber
+     */
+    private Servo v_servo_climber;
+
+    //--------------------------------------------------------------------------
+    //
+    // v_servo_climber
+    //
+    /**
+     * Use to position the pushing pad
+     */
+    private Servo v_servo_beacon;
 
     // ODS sensor to scan tape
     private OpticalDistanceSensor v_ods;
 
-    // Ultra sonic to sense the distance to stop the robot
-    private UltrasonicSensor v_l_ultra, v_r_ultra;
+    private UltrasonicSensor v_ultra;
 
-    // Color sensor to determin the color of the beacon
+    private TouchSensor v_touch;
+
     private ColorSensor v_color;
 
 

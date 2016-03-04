@@ -56,6 +56,7 @@ public class T9015TeleOp extends OpMode { // T9015Hardware { // OpMode {
     Servo   spull;
     Servo   sback;
     Servo   sclimber;
+    Servo   l_beacon, r_beacon;
 
     DcMotor pull;
     DcMotor slide;
@@ -101,17 +102,24 @@ public class T9015TeleOp extends OpMode { // T9015Hardware { // OpMode {
 
         hang1 = hardwareMap.dcMotor.get("hang1");
         hang2 = hardwareMap.dcMotor.get("hang2");
-        hang2.setDirection(DcMotor.Direction.REVERSE);
+        hang1.setDirection(DcMotor.Direction.REVERSE);
 
         // servo to guide the puller tape
         spull = hardwareMap.servo.get("spull");
+        spull.setPosition(ARM_MIN_RANGE);
 
         // back plate servo
         sback = hardwareMap.servo.get("sback");
+        sback.setPosition(RobotInfo.BACK_DOWN_POSITION);
 
         // back plate servo
         sclimber = hardwareMap.servo.get("sclimber");
         sclimber.setPosition(RobotInfo.CLIMBER_LOCK_POSITION);
+
+        l_beacon = hardwareMap.servo.get ("b1");
+        r_beacon = hardwareMap.servo.get ("b2");
+        l_beacon.setPosition(RobotInfo.BEACON_DEFAULT_POSITION);
+        r_beacon.setPosition(RobotInfo.BEACON_DEFAULT_POSITION);
 
         // motor for the puller tape
         pull = hardwareMap.dcMotor.get("pull");
@@ -186,9 +194,9 @@ public class T9015TeleOp extends OpMode { // T9015Hardware { // OpMode {
 
             //moves hanging arms
             if (gamepad1.dpad_up) {
-                hpower = -0.20;
-            } else if (gamepad1.dpad_down) {
                 hpower = 0.20;
+            } else if (gamepad1.dpad_down) {
+                hpower = -0.35;
             } else {
                 // power 0
                 hpower = 0;
